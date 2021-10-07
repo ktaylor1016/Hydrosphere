@@ -9,7 +9,7 @@ import numpy as np
 #core_density=5500
 #target_planet=2
 
-def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass, core_radius, core_density):
+def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass, core_radius, core_density, rawdata_flg):
 
     # Import necessary packages
     from scipy.optimize import minimize
@@ -28,8 +28,8 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
     # Redefine variables
     P_s_set = [surface_p]
     T_s_set = np.linspace(min_surface_t,max_surface_t,num=res_T)
-    Mass_W_i_set = [water_mass]
-    r_b_set = [core_radius]
+    Mass_W_i_set = np.linspace(water_mass, water_mass, num=res_MW) #[water_mass]
+    r_b_set = np.linspace(core_radius, core_radius, num=res_r)  #[core_radius]
     rho_core_set = [core_density]
 
     for count1 in range(res_T):
@@ -178,10 +178,28 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                         return -k_water[i]*dT_dz[i] ## CHECK UNITS
 
                     # Find depth of bottom of surface layer
-                    from numpy import diff
+                    #from numpy import diff
                     # can use diff(y)/diff(x) like I did in wedge plot, but this has same problem of having to iterate through all i to calculate derivative and find inflection pts
 
-                    q_grid = np.zeros(z.size) # Heat flux grid
+                    """
+                    q_grid1=[]
+                    for i in range(0,0):
+                        if phase[i]==0:
+                            q_grid1.append(q_water[i])
+                        if phase[i]==1:
+                            q_grid.append(q_Ih[i])
+                    q_grid1=np.array(q_grid1)
+
+                    def Q(i): # heat production, total heat
+                        return q_grid[i]*4*3.14159*(z[i])**2
+                    Q_grid1=[]
+                    for i in range(0,0):
+                        Q_grid1.append(Q[i])
+                    Q_grid1=np.array(Q_grid1)
+                    """
+
+                    """
+                    q_grid = np.zeros(z.size) # Heat flux grid  ## maybe also need to change size of this ##
                     for i in range(z.size-1):                   ########## CHANGE - CALCULATE *JUST* FOR SURFACE LAYER? ############ for all i in phase == 1: ..., for all i in phase == 0: ... just calculate for i = 0 and max i
                         if phase[i]==1:
                             np.append(q_grid, q_Ih(i))
@@ -194,25 +212,36 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                     for i in range(z.size-1):
                         np.append(Q_grid,Q(i))
                     #units should be TW - 10-100s
+                    """
 
-                # Compute Internal Heating
-                Surface_Internal_Heating = Q[0]
+                    # Compute Internal Heating
+                    for i in range(0,0):
+                        if phase[i]==0:
+                            surface_heat_flux=q_water[i]
+                            surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
+                            print("Surface heat flux is"+surface_heat_flux+"units")
+                            print("Surface internal heating is"+surface_internal_heating+"units")
+                        if phase[i]==1:
+                            surface_heat_flux=q_Ih[i]
+                            surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
+                            print("Surface heat flux is"+surface_heat_flux+"units")
+                            print("Surface internal heating is"+surface_internal_heating+"units")
 
-                # Compute Mass
-                Mass_WL = np.sum(M_L)
-                Mass_diff = Mass_W_i-Mass_WL
+                    # Compute Mass
+                    Mass_WL = np.sum(M_L)
+                    Mass_diff = Mass_W_i-Mass_WL
 
-                # depth difference for Mass convergence
-                depth_diff = (np.abs(Mass_diff)/(np.mean(rho)*1.8)/(4/3*np.pi)+r_b**3)**(1/3)-r_b
-                if   Mass_diff > 0:  
-                        depth = depth + depth_diff
-                else:
-                    depth = depth - depth_diff
+                    # depth difference for Mass convergence
+                    depth_diff = (np.abs(Mass_diff)/(np.mean(rho)*1.8)/(4/3*np.pi)+r_b**3)**(1/3)-r_b
+                    if   Mass_diff > 0:  
+                            depth = depth + depth_diff
+                    else:
+                        depth = depth - depth_diff
 
-                if EnableTest == 1:
-                    print("depth after " + str(depth))
-                    print()
-                print('Mass Convergence (%): ' + str(Mass_diff/Mass_WL*100))
+                    if EnableTest == 1:
+                        print("depth after " + str(depth))
+                        print()
+                    print('Mass Convergence (%): ' + str(Mass_diff/Mass_WL*100))
                     
                 # Compute Mass
                 E_M_WL = Mass_WL/5.9722e24 # Mass Water Layer in Earth mass
@@ -256,13 +285,13 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                     filename = "T"+str(count1+1)+"M"+str(count2+1)+"Rb"+str(count3+1)+".txt"
                     with open(filename, mode = "w") as file0:
                         file0.write("depth density thermal_expansivity heat_capacity thermal_gradient ")
-                        file0.write("phase temperature pressure gravity mass\n heat_flux total_internal_heat")
+                        file0.write("phase temperature pressure gravity mass\n surface_heat_flux total_internal_heat")
                         for i in range(rho.size):
                             file0.write(str(z[i])+" "+str(rho[i])+" "+str(alpha[i])+" "+str(Cp[i])+" "+str(dT_dz[i])+" ")
-                            file0.write(str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+"\n+ "+str(q_grid[i])+" "+str(Q_grid[i]))  ### Think I added heat flux here?
+                            file0.write(str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+"\n+ "+str(surface_heat_flux)+" "+str(surface_internal_heating))  ### Think I added heat flux here?
 
 # Calculate heat flux for values of surface temperature between 263 and 373
-hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21,core_radius=0.6*6.36e+06,core_density=5500)
+hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21,core_radius=0.6*6.36e+06,core_density=5500,rawdata_flg=1)
 
 # Text files should save to PythonPrograms folder
 
@@ -315,6 +344,8 @@ ax.plot(surface_t_array, Q_surface_array, linewidth=2, color='blue')
 # to make GIF of temperature profiles:
 #https://stackoverflow.com/questions/753190/programmatically-generate-video-or-animated-gif-in-python
 #https://pypi.org/project/celluloid/
+
+from celluloid import Camera
 
 """
 print('done')
