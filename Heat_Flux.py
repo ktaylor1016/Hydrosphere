@@ -215,17 +215,17 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                     """
 
                     # Compute Internal Heating
-                    for i in range(0,0):
+                    for i in range(0,1):
                         if phase[i]==0:
                             surface_heat_flux=q_water[i]
                             surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
-                            print("Surface heat flux is"+surface_heat_flux+"units")
-                            print("Surface internal heating is"+surface_internal_heating+"units")
+                            print("Surface heat flux is"+str(surface_heat_flux)+"units")
+                            print("Surface internal heating is"+str(surface_internal_heating)+"units")
                         if phase[i]==1:
-                            surface_heat_flux=q_Ih[i]
+                            surface_heat_flux=632*np.log(T[i]/T_s)/(z[i+1]-z[i])
                             surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
-                            print("Surface heat flux is"+surface_heat_flux+"units")
-                            print("Surface internal heating is"+surface_internal_heating+"units")
+                            print("Surface heat flux is"+str(surface_heat_flux)+"units")
+                            print("Surface internal heating is"+str(surface_internal_heating)+"units")
 
                     # Compute Mass
                     Mass_WL = np.sum(M_L)
