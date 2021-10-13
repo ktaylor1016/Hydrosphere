@@ -60,10 +60,6 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                 alpha_VII = 2.45e-4
                 Cp_VII = 3400
 
-                # Ice Ih conductivity (Andersson and Akira, 2005)    ######################## Define thermal conductivity #######################
-                def K_Ih(P, T):
-                    return -2.04104873*P+(632/T+0.38-0.00197*T)
-
                 # Rocky/metal core calculation
                 Mass_core = 4/3*np.pi*r_b**3*rho_core
                 g_s = 6.67430e-11*Mass_core/r_b**2  # Gravity at the Hydrosphere Mantle Boundary
@@ -168,61 +164,33 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                             grav[i] = 6.67430e-11*(Mass_core+Mass_Shells[i])/(r_b+z[i])**2  
 
                     # Compute Heat Flux                                        ################### Computing Heat Flux ###############
-                    D_Ih=632    # from Andersson and Inaba 2005
-                    def q_Ih(i):
-                        return D_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]) ## CHECK UNITS
+                    def K_Ih(i):
+                        return 2.2207(1+0.105(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
 
-                    def k_water(i):
-                        return 0.00565*[1+0.00319*(T[i]+273.15)-0.0000103*(T[i]+273.15)**2] ## CHECK UNITS - from Riedel 1949, gives thermal conductivity in watt/cm °C). 
+                    def q_Ih(i):
+                        return -K_Ih(i)*dT_dz[i] #From Planet Profile: -K_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]), Units are W/m*K
+
+                    def K_water(i):
+                        return -8.354*(2.71828)-6*((T[i])**2)+6.53*2.71828-3*T[i]-0.5981 ## Units unknown, from https://www.researchgate.net/post/Thermal_conductivity_of_water
+                        #From Riedel 1949: 0.00565*[1+0.00319*(T[i]+273.15)-0.0000103*(T[i]+273.15)**2], units are watt/cm °C). This is for 0-90°C, so not good here.
+
                     def q_water(i):
-                        return -k_water[i]*dT_dz[i] ## CHECK UNITS
+                        return -K_water[i]*dT_dz[i] ## CHECK UNITS
 
                     # Find depth of bottom of surface layer
                     #from numpy import diff
                     # can use diff(y)/diff(x) like I did in wedge plot, but this has same problem of having to iterate through all i to calculate derivative and find inflection pts
 
-                    """
-                    q_grid1=[]
-                    for i in range(0,0):
-                        if phase[i]==0:
-                            q_grid1.append(q_water[i])
-                        if phase[i]==1:
-                            q_grid.append(q_Ih[i])
-                    q_grid1=np.array(q_grid1)
-
-                    def Q(i): # heat production, total heat
-                        return q_grid[i]*4*3.14159*(z[i])**2
-                    Q_grid1=[]
-                    for i in range(0,0):
-                        Q_grid1.append(Q[i])
-                    Q_grid1=np.array(Q_grid1)
-                    """
-
-                    """
-                    q_grid = np.zeros(z.size) # Heat flux grid  ## maybe also need to change size of this ##
-                    for i in range(z.size-1):                   ########## CHANGE - CALCULATE *JUST* FOR SURFACE LAYER? ############ for all i in phase == 1: ..., for all i in phase == 0: ... just calculate for i = 0 and max i
-                        if phase[i]==1:
-                            np.append(q_grid, q_Ih(i))
-                        if phase[i]==0:
-                            np.append(q_grid, q_water(i))
-
-                    def Q(i): # heat production, total heat
-                        return q_grid[i]*4*3.14159*(z[i])**2
-                    Q_grid = np.zeros(z.size)       # Internal Heating grid
-                    for i in range(z.size-1):
-                        np.append(Q_grid,Q(i))
-                    #units should be TW - 10-100s
-                    """
-
+                    
                     # Compute Internal Heating
                     for i in range(0,1):
                         if phase[i]==0:
-                            surface_heat_flux=q_water[i]
+                            surface_heat_flux=q_water(i)
                             surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
                             print("Surface heat flux is"+str(surface_heat_flux)+"units")
                             print("Surface internal heating is"+str(surface_internal_heating)+"units")
                         if phase[i]==1:
-                            surface_heat_flux=632*np.log(T[i]/T_s)/(z[i+1]-z[i])
+                            surface_heat_flux=q_Ih(i)
                             surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
                             print("Surface heat flux is"+str(surface_heat_flux)+"units")
                             print("Surface internal heating is"+str(surface_internal_heating)+"units")
