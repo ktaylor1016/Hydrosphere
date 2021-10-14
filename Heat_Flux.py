@@ -9,7 +9,7 @@ import numpy as np
 #core_density=5500
 #target_planet=2
 
-def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass, core_radius, core_density, rawdata_flg):
+def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass, res_mw, core_radius, res_radius, core_density, rawdata_flg):
 
     # Import necessary packages
     from scipy.optimize import minimize
@@ -20,8 +20,8 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
 
     # Specify resolution
     res_T = res_t
-    res_MW = 10
-    res_r = 5
+    res_MW = res_mw
+    res_r = res_radius
     tot = res_T*res_MW*res_r
     clo = 0
 
@@ -134,32 +134,6 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                             T[i+1] = T[i] + dT_dz[i] * (z[i+1]-z[i]);             ########## Filling in temp grid ############
                             P[i+1] = P[i] + rho[i] * g[i] * (z[i+1]-z[i])*1e-6;
                             PT[0] = (P[i+1],T[i+1])
-
-                            def K_Ih(i):
-                                return 2.2207*(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
-
-                            def q_Ih(i):
-                                return -K_Ih(i)*dT_dz[i] #From Planet Profile: -K_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]), Units are W/m*K
-
-                            def K_water(i):
-                                return -8.354*(2.71828)-6*((T[i])**2)+6.53*2.71828-3*T[i]-0.5981 ## Units unknown, from https://www.researchgate.net/post/Thermal_conductivity_of_water
-
-                            def q_water(i):
-                                return -K_water[i]*dT_dz[i] ## CHECK UNITS
-
-                            # Compute Internal Heating
-                            for i in range(0,1):
-                                if phase[i]==0:
-                                    surface_heat_flux=q_water(i)
-                                    surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
-                                    print("Surface heat flux is"+str(surface_heat_flux)+"units")
-                                    print("Surface internal heating is"+str(surface_internal_heating)+"units")
-                                if phase[i]==1:
-                                    surface_heat_flux=q_Ih(i)
-                                    surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
-                                    print("Surface heat flux is"+str(surface_heat_flux)+"units")
-                                    print("Surface internal heating is"+str(surface_internal_heating)+"units")
-
                             
                             if P[i+1] > 2200:
                                 Tm=((P[i+1]*1e-3-2.17)/1.253+1)**(1/3)*354.8
@@ -190,35 +164,32 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                         for i in range(len(rho)):    
                             grav[i] = 6.67430e-11*(Mass_core+Mass_Shells[i])/(r_b+z[i])**2  
 
-                    """
-                    # Compute Heat Flux                                        ################### Computing Heat Flux ###############
+                    
+                    # Compute Thermal Conducitiviy & Heat Flux                                        ################### Computing Heat Flux ###############
                     def K_Ih(i):
-                        return 2.2207(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
+                        return 2.2207*(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
 
                     def q_Ih(i):
                         return -K_Ih(i)*dT_dz[i] #From Planet Profile: -K_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]), Units are W/m*K
 
                     def K_water(i):
                         return -8.354*(2.71828)-6*((T[i])**2)+6.53*2.71828-3*T[i]-0.5981 ## Units unknown, from https://www.researchgate.net/post/Thermal_conductivity_of_water
-                        #From Riedel 1949: 0.00565*[1+0.00319*(T[i]+273.15)-0.0000103*(T[i]+273.15)**2], units are watt/cm °C). This is for 0-90°C, so not good here.
 
                     def q_water(i):
-                        return -K_water[i]*dT_dz[i] ## CHECK UNITS
-                    
-                    # Compute Internal Heating
+                        return -K_water(i)*dT_dz[i] ## CHECK UNITS
+
+                    # Compute Surface Heat Flux & Internal Heating
                     for i in range(0,1):
                         if phase[i]==0:
                             surface_heat_flux=q_water(i)
-                            surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
-                            print("Surface heat flux is"+str(surface_heat_flux)+"units")
-                            print("Surface internal heating is"+str(surface_internal_heating)+"units")
+                            surface_internal_heating=surface_heat_flux*4*3.14159*(z[i+1])**2
+                            print("Surface heat flux is "+str(surface_heat_flux)+" W/m^2")
+                            print("Surface internal heating is "+str(surface_internal_heating)+" W")
                         if phase[i]==1:
                             surface_heat_flux=q_Ih(i)
-                            surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
-                            print("Surface heat flux is"+str(surface_heat_flux)+"units")
-                            print("Surface internal heating is"+str(surface_internal_heating)+"units")
-
-                    """
+                            surface_internal_heating=surface_heat_flux*4*3.14159*(z[i+1])**2
+                            print("Surface heat flux is "+str(surface_heat_flux)+" W/m^2")
+                            print("Surface internal heating is "+str(surface_internal_heating)+" W")
 
                     # Compute Mass
                     Mass_WL = np.sum(M_L)
@@ -281,29 +252,44 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                         file0.write("phase temperature pressure gravity mass\n surface_heat_flux total_internal_heat")
                         for i in range(rho.size):
                             file0.write(str(z[i])+" "+str(rho[i])+" "+str(alpha[i])+" "+str(Cp[i])+" "+str(dT_dz[i])+" ")
-                            file0.write(str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+"\n+ "+str(surface_heat_flux)+" "+str(surface_internal_heating))  ### Think I added heat flux here?
+                            file0.write(str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+"\n+ "+str(surface_heat_flux)+" "+str(surface_internal_heating))
 
 # Calculate heat flux for values of surface temperature between 263 and 373
-hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21,core_radius=0.6*6.36e+06,core_density=5500,rawdata_flg=1)
+hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21, res_mw=1, core_radius=0.6*6.36e+06, res_radius=1, core_density=5500,rawdata_flg=1)
 
 # Text files should save to PythonPrograms folder
 
 # Open and read in text files, extract surface Q values
 
-"""
 res_T = 10
-res_MW = 10
-res_r = 5
-
+res_MW=1
+res_r=1
 min_surface_t=263
 max_surface_t=373
 surface_t_array = np.linspace(min_surface_t,max_surface_t,num=res_T)
 
-n = 10 #number of different surface_t's
-Q_surface_array = np.empty(shape=[1,n])
+Q_surface_array = np.empty(shape=[1,res_T])
 
 #maybe use pandas to read in data files more easily
 
+
+# To read in data with a for loop
+#initalize the dictionary 
+data = {}
+#for loop to get key names
+for count1 in range(res_T):
+    for count2 in range(res_MW):
+        for count3 in range(res_r):
+            #key name is what the array is called
+            key_name = "Q"+ str(count1 + 1) + str(count2 + 1) + str(count3 + 1)
+            #value is what the data actually is
+            value = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/"T"+str(count1+1)+"M"+str(count2+1)+"Rb"+str(count3+1)+".txt"',usecols=11)
+            #now that we have both we can add this to the dictionary
+            data[key_name] = value
+
+
+
+"""
 for count1 in range(res_T):
     for count2 in range(res_MW):
         for count3 in range(res_r):
@@ -323,8 +309,8 @@ for count1 in range(res_T):
             # T arrays
             array_name3 = "T"+str(count1+1)+str(count2+1)+str(count3+1)
             array_name3 = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=6)
-
-
+"""
+"""
 # Plot surface flux vs surface temp
 fig, ax = plt.subplots(figsize=(15, 11))
 ax.set_xlabel('Surface Temperature (K)', size=30)
