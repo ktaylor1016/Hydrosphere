@@ -248,83 +248,24 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                 if rawdata_flg == 1:
                     filename = "T"+str(count1+1)+"M"+str(count2+1)+"Rb"+str(count3+1)+".txt"
                     with open(filename, mode = "w") as file0:
+                        file0.write("depth density thermal_expansivity heat_capacity thermal_gradient phase temperature pressure gravity mass\n surface_heat_flux total_internal_heat")
+                        for i in range(rho.size):
+                            file0.write(str(z[i])+" "+str(rho[i])+" "+str(alpha[i])+" "+str(Cp[i])+" "+str(dT_dz[i])+" "+str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+"\n "+str(surface_heat_flux)+" "+str(surface_internal_heating)+" ")
+
+# Calculate heat flux for values of surface temperature between 263 and 373
+hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21, res_mw=1, core_radius=0.6*6.36e+06, res_radius=1, core_density=5500,rawdata_flg=1)
+
+
+"""
+# original raw data output code:
+                #print(count3)
+                # Output the raw data to seperated files 
+                if rawdata_flg == 1:
+                    filename = "T"+str(count1+1)+"M"+str(count2+1)+"Rb"+str(count3+1)+".txt"
+                    with open(filename, mode = "w") as file0:
                         file0.write("depth density thermal_expansivity heat_capacity thermal_gradient ")
                         file0.write("phase temperature pressure gravity mass\n surface_heat_flux total_internal_heat")
                         for i in range(rho.size):
                             file0.write(str(z[i])+" "+str(rho[i])+" "+str(alpha[i])+" "+str(Cp[i])+" "+str(dT_dz[i])+" ")
                             file0.write(str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+"\n+ "+str(surface_heat_flux)+" "+str(surface_internal_heating))
-
-# Calculate heat flux for values of surface temperature between 263 and 373
-hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21, res_mw=1, core_radius=0.6*6.36e+06, res_radius=1, core_density=5500,rawdata_flg=1)
-
-# Text files should save to PythonPrograms folder
-
-# Open and read in text files, extract surface Q values
-
-res_T = 10
-res_MW=1
-res_r=1
-min_surface_t=263
-max_surface_t=373
-surface_t_array = np.linspace(min_surface_t,max_surface_t,num=res_T)
-
-Q_surface_array = np.empty(shape=[1,res_T])
-
-#maybe use pandas to read in data files more easily
-
-
-# To read in data with a for loop
-#initalize the dictionary 
-data = {}
-#for loop to get key names
-for count1 in range(res_T):
-    for count2 in range(res_MW):
-        for count3 in range(res_r):
-            #key name is what the array is called
-            key_name = "Q"+ str(count1 + 1) + str(count2 + 1) + str(count3 + 1)
-            #value is what the data actually is
-            value = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/"T"+str(count1+1)+"M"+str(count2+1)+"Rb"+str(count3+1)+".txt"',usecols=11)
-            #now that we have both we can add this to the dictionary
-            data[key_name] = value
-
-
-
 """
-for count1 in range(res_T):
-    for count2 in range(res_MW):
-        for count3 in range(res_r):
-            # Q arrays
-            array_name = "Q"+str(count1+1)+str(count2+1)+str(count3+1) #name arrays
-            array_name = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=11)
-            
-            # Q_surface array for all trials
-            Q_surface_value = array_name[0] # take first value from array of Q values to get Q_surface
-            Q_surface_array=np.append(Q_surface_array,Q_surface_value)
-
-            #Create temp profile arrays
-            # z arrays
-            array_name2 = "z"+str(count1+1)+str(count2+1)+str(count3+1)
-            array_name2 = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=0)
-
-            # T arrays
-            array_name3 = "T"+str(count1+1)+str(count2+1)+str(count3+1)
-            array_name3 = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=6)
-"""
-"""
-# Plot surface flux vs surface temp
-fig, ax = plt.subplots(figsize=(15, 11))
-ax.set_xlabel('Surface Temperature (K)', size=30)
-ax.set_ylabel('Internal Heating (Q) at Surface (TW)', size=30)
-ax.set_title('Internal Heating as a Function of Surface Temperature', size=25)
-ax.tick_params(axis='both', labelsize=25)
-ax.tick_params(direction='in', length=6, width=2, colors='black')
-ax.plot(surface_t_array, Q_surface_array, linewidth=2, color='blue')
-
-# to make GIF of temperature profiles:
-#https://stackoverflow.com/questions/753190/programmatically-generate-video-or-animated-gif-in-python
-#https://pypi.org/project/celluloid/
-
-from celluloid import Camera
-
-"""
-print('done')
