@@ -134,6 +134,33 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                             T[i+1] = T[i] + dT_dz[i] * (z[i+1]-z[i]);             ########## Filling in temp grid ############
                             P[i+1] = P[i] + rho[i] * g[i] * (z[i+1]-z[i])*1e-6;
                             PT[0] = (P[i+1],T[i+1])
+
+                            def K_Ih(i):
+                                return 2.2207(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
+
+                            def q_Ih(i):
+                                return -K_Ih(i)*dT_dz[i] #From Planet Profile: -K_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]), Units are W/m*K
+
+                            def K_water(i):
+                                return -8.354*(2.71828)-6*((T[i])**2)+6.53*2.71828-3*T[i]-0.5981 ## Units unknown, from https://www.researchgate.net/post/Thermal_conductivity_of_water
+
+                            def q_water(i):
+                                return -K_water[i]*dT_dz[i] ## CHECK UNITS
+
+                            # Compute Internal Heating
+                            for i in range(0,1):
+                                if phase[i]==0:
+                                    surface_heat_flux=q_water(i)
+                                    surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
+                                    print("Surface heat flux is"+str(surface_heat_flux)+"units")
+                                    print("Surface internal heating is"+str(surface_internal_heating)+"units")
+                                if phase[i]==1:
+                                    surface_heat_flux=q_Ih(i)
+                                    surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
+                                    print("Surface heat flux is"+str(surface_heat_flux)+"units")
+                                    print("Surface internal heating is"+str(surface_internal_heating)+"units")
+
+                            
                             if P[i+1] > 2200:
                                 Tm=((P[i+1]*1e-3-2.17)/1.253+1)**(1/3)*354.8
                                 if T[i+1] < Tm:
@@ -163,9 +190,10 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                         for i in range(len(rho)):    
                             grav[i] = 6.67430e-11*(Mass_core+Mass_Shells[i])/(r_b+z[i])**2  
 
+                    """
                     # Compute Heat Flux                                        ################### Computing Heat Flux ###############
                     def K_Ih(i):
-                        return 2.2207(1+0.105(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
+                        return 2.2207(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
 
                     def q_Ih(i):
                         return -K_Ih(i)*dT_dz[i] #From Planet Profile: -K_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]), Units are W/m*K
@@ -176,11 +204,6 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
 
                     def q_water(i):
                         return -K_water[i]*dT_dz[i] ## CHECK UNITS
-
-                    # Find depth of bottom of surface layer
-                    #from numpy import diff
-                    # can use diff(y)/diff(x) like I did in wedge plot, but this has same problem of having to iterate through all i to calculate derivative and find inflection pts
-
                     
                     # Compute Internal Heating
                     for i in range(0,1):
@@ -194,6 +217,8 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                             surface_internal_heating=surface_heat_flux*4*3.14159*(z[i])**2
                             print("Surface heat flux is"+str(surface_heat_flux)+"units")
                             print("Surface internal heating is"+str(surface_internal_heating)+"units")
+
+                    """
 
                     # Compute Mass
                     Mass_WL = np.sum(M_L)
