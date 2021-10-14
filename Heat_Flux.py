@@ -136,7 +136,7 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                             PT[0] = (P[i+1],T[i+1])
 
                             def K_Ih(i):
-                                return 2.2207(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
+                                return 2.2207*(1+0.105*(T[i]-273.15))  #from Wikipedia, 2.2207(1+0.105(T-273.15)), Units are W/m*K
 
                             def q_Ih(i):
                                 return -K_Ih(i)*dT_dz[i] #From Planet Profile: -K_Ih*np.log(T[i]/T_s)/(z[i+1]-z[i]), Units are W/m*K
