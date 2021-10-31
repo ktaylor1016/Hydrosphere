@@ -250,7 +250,7 @@ def hydrosphere_flux(surface_p, max_surface_t, min_surface_t, res_t, water_mass,
                     with open(filename, mode = "w") as file0:
                         file0.write("depth density thermal_expansivity heat_capacity thermal_gradient phase temperature pressure gravity mass surface_heat_flux total_internal_heat\n")
                         for i in range(rho.size):
-                            file0.write(str(z[i])+" "+str(rho[i])+" "+str(alpha[i])+" "+str(Cp[i])+" "+str(dT_dz[i])+" "+str(phase[i])+" "+str(T[i])+" "+str(P[i])+" "+str(grav[i])+" "+str(M_L[i])+" "+str(surface_heat_flux)+" "+str(surface_internal_heating)+"\n")
+                            file0.write((str(z[i])+" ")+(str(rho[i])+" ")+(str(alpha[i])+" ")+(str(Cp[i])+" ")+(str(dT_dz[i])+" ")+(str(phase[i])+" ")+(str(T[i])+" ")+(str(P[i])+" ")+(str(grav[i])+" ")+(str(M_L[i])+" ")+(str(surface_heat_flux)+" ")+(str(surface_internal_heating)+"\n"))
 
 # Calculate heat flux for values of surface temperature between 263 and 373
 hydrosphere_flux(surface_p=0.1, min_surface_t=263, max_surface_t=373, res_t=10, water_mass=1.4e+21, res_mw=1, core_radius=0.6*6.36e+06, res_radius=1, core_density=5500,rawdata_flg=1)

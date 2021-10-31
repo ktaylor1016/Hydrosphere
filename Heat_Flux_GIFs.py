@@ -20,7 +20,7 @@ Q_surface_array = []
 #T0=np.genfromtxt('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/T1M1Rb1.txt',usecols=6)
 #T0_s=T0[0]
 
-df0=pd.read_csv("T1M1Rb1.txt") # add usecols=[0,6,10,11], format of columns is weird...need to fix
+df0=pd.read_csv('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/T1M1Rb1.txt', usecols=[0,6,10,11], sep=' ') # add usecols=[0,6,10,11], may not be able to read in as columns bc they were input as a string??
 print(df0)
 z0=df0["depth"]
 T0=df0["temperature"]
