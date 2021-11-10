@@ -43,89 +43,56 @@ for f in csv_files:
     T=df[:,6]
     T_surface=T[0]
 
-    #fig, axs = plt.subplots(2)
-    #fig.suptitle('Temperature = '+str(round(T_surface,1))+'K')
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    fig.suptitle('Temperature = '+str(round(T_surface,1))+'K')
 
     # plot temp profile
-    fig, ax = plt.subplots(figsize=(15, 11))
-    ax.set_xlabel('Temperature (K)', size=30)
-    ax.set_ylabel('Depth (km)', size=30)
-    ax.invert_yaxis()
-    ax.set_title('Temperature Profile', size=25)
-    ax.tick_params(axis='both', labelsize=25)
-    ax.tick_params(direction='in', length=6, width=2, colors='black')
-    ax.plot(T, z, linewidth=2, color='blue', label='Temperature = '+str(round(T_surface,1))+'K')
-    plt.legend(loc="upper right", prop={'size':20})
+    #fig, ax = plt.subplots(figsize=(15, 11))
+    ax1.set_xlabel('Temperature (K)', size=10)
+    ax1.set_ylabel('Depth (km)', size=10)
+    plt.ylim([0,max(z)])
+    ax1.invert_yaxis()
+    ax1.set_title('Temperature Profile', size=15)
+    ax1.tick_params(axis='both', labelsize=10)
+    ax1.tick_params(direction='in', length=6, width=2, colors='black')
+    ax1.plot(T, z, linewidth=2, color='blue', label='Temperature = '+str(round(T_surface,1))+'K')
+    #plt.legend(loc="upper right", prop={'size':20})
     #plt.show()
-    fig.savefig('Output Files/Figures/temp_profile.png') # change f to name of file
+    #fig.savefig('Output Files/Figures/temp_profile.png') # change f to name of file
 
     # plot phase profile
-    fig, ax = plt.subplots(figsize=(15, 11))
-    ax.set_xlabel('Phase', size=30)
-    ax.set_ylabel('Depth (km)', size=30)
+    #fig, ax = plt.subplots(figsize=(15, 11))
+    ax2.set_xlabel('Phase', size=10)
+    ax2.set_ylabel('Depth (km)', size=10)
+    plt.ylim([0,max(z)])
     plt.xlim([-0.5,7])
-    ax.invert_yaxis()
-    ax.set_title('Phase Profile', size=25)
-    ax.tick_params(axis='both', labelsize=25)
-    ax.tick_params(direction='in', length=6, width=2, colors='black')
-    ax.plot(phase, z, linewidth=2, color='blue', label='Temperature = '+str(round(T_surface,1))+'K')
-    plt.legend(loc="upper right", prop={'size':20})
-    fig.savefig('Output Files/Figures/phase_profile.png')
+    ax2.invert_yaxis()
+    ax2.set_title('Phase Profile', size=15)
+    ax2.tick_params(axis='both', labelsize=10)
+    ax2.tick_params(direction='in', length=6, width=2, colors='black')
+    ax2.plot(phase, z, linewidth=2, color='blue', label='Temperature = '+str(round(T_surface,1))+'K')
+    #plt.legend(loc="upper right", prop={'size':20})
+    fig.savefig('Output Files/'+os.path.basename(f)+'.png')
 
-
-
-"""
-# make for loop for reading in files?
-df0=pd.read_csv('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files/T1M1Rb1.txt', usecols=[0,5,6,10,11], sep=' ') 
-z0=df0["depth"]
-phase0=df0["phase"]
-T0=df0["temperature"]
-q0=df0["surface_heat_flux"]
-Q0=df0["total_internal_heat"]
-
-df1=pd.read_csv('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files/T2M1Rb1.txt', usecols=[0,5,6,10,11], sep=' ') 
-z1=df1["depth"]
-phase1=df1["phase"]
-T1=df1["temperature"]
-q1=df1["surface_heat_flux"]
-Q1=df1["total_internal_heat"]
-
-
-# plot temp profile
-fig, ax = plt.subplots(figsize=(15, 11))
-ax.set_xlabel('Depth (km)', size=30)
-ax.set_ylabel('Temperature (K)', size=30)
-ax.set_title('Temperature Profile', size=25)
-ax.tick_params(axis='both', labelsize=25)
-ax.tick_params(direction='in', length=6, width=2, colors='black')
-ax.plot(z0, T0, linewidth=2, color='blue')
-plt.show()
-
-# plot phase profile
-fig, ax = plt.subplots(figsize=(15, 11))
-ax.set_xlabel('Depth (km)', size=30)
-ax.set_ylabel('Phase', size=30)
-ax.set_title('Phase Profile', size=25)
-ax.tick_params(axis='both', labelsize=25)
-ax.tick_params(direction='in', length=6, width=2, colors='black')
-ax.plot(z0, phase0, linewidth=2, color='blue')
-plt.show()
-
-# make single values, append to array for diff temps
-#Q0 = access single cell https://stackoverflow.com/questions/16729574/how-to-get-a-value-from-a-cell-of-a-dataframe
-"""
+from PIL import Image
+import glob
+ 
+# Create the frames
+frames = []
+imgs = glob.glob("*.png")
+for i in imgs:
+    new_frame = Image.open(i)
+    frames.append(new_frame)
+ 
+# Save into a GIF file that loops forever
+frames[0].save('png_to_gif.gif', format='GIF',
+               append_images=frames[1:],
+               save_all=True,
+               duration=300, loop=0)
 
 """
-# Plot surface flux vs surface temp
-fig, ax = plt.subplots(figsize=(15, 11))
-ax.set_xlabel('Surface Temperature (K)', size=30)
-ax.set_ylabel('Internal Heating (Q) at Surface (TW)', size=30)
-ax.set_title('Internal Heating as a Function of Surface Temperature', size=25)
-ax.tick_params(axis='both', labelsize=25)
-ax.tick_params(direction='in', length=6, width=2, colors='black')
-ax.plot(surface_t_array, Q_surface_array, linewidth=2, color='blue')
-
 # to make GIF of temperature profiles:
+#https://pythonprogramming.altervista.org/png-to-gif/
 #https://stackoverflow.com/questions/753190/programmatically-generate-video-or-animated-gif-in-python
 #https://pypi.org/project/celluloid/
 
