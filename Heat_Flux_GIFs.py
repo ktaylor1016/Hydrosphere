@@ -1,6 +1,7 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Text files should save to PythonPrograms folder
 
@@ -17,55 +18,103 @@ surface_t_array = np.linspace(min_surface_t,max_surface_t,num=res_T)
 T_surface_array = []
 Q_surface_array = []
 
-#T0=np.genfromtxt('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/T1M1Rb1.txt',usecols=6)
-#T0_s=T0[0]
+# read in raw data files
+import pandas as pd
+import os
+import glob
+  
+# use glob to get all the csv files in this folder
+path = '/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files' #os.getcwd() 
+csv_files = glob.glob(os.path.join(path, "*.txt"))
+print(csv_files) #empty
 
-df0=pd.read_csv('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/T1M1Rb1.txt', usecols=[0,6,10,11], sep=' ') # add usecols=[0,6,10,11], may not be able to read in as columns bc they were input as a string??
-print(df0)
+#os.listdir(path)
+#files=os.listdir(path)
+#for f in myFiles:
+    #data=np.loadtxt(f,delimeter=" ", skiprows=6)
+#myFiles=glob.glob('*.txt)
+
+# loop over the list of csv files
+for f in csv_files:
+    # read the csv file
+    df = np.loadtxt(f,delimiter=" ", skiprows=6)
+    z=df[:,0]
+    phase=df[:,5]
+    T=df[:,6]
+    T_surface=T[0]
+
+    #fig, axs = plt.subplots(2)
+    #fig.suptitle('Temperature = '+str(round(T_surface,1))+'K')
+
+    # plot temp profile
+    fig, ax = plt.subplots(figsize=(15, 11))
+    ax.set_xlabel('Temperature (K)', size=30)
+    ax.set_ylabel('Depth (km)', size=30)
+    ax.invert_yaxis()
+    ax.set_title('Temperature Profile', size=25)
+    ax.tick_params(axis='both', labelsize=25)
+    ax.tick_params(direction='in', length=6, width=2, colors='black')
+    ax.plot(T, z, linewidth=2, color='blue', label='Temperature = '+str(round(T_surface,1))+'K')
+    plt.legend(loc="upper right", prop={'size':20})
+    #plt.show()
+    fig.savefig('Output Files/Figures/temp_profile.png') # change f to name of file
+
+    # plot phase profile
+    fig, ax = plt.subplots(figsize=(15, 11))
+    ax.set_xlabel('Phase', size=30)
+    ax.set_ylabel('Depth (km)', size=30)
+    plt.xlim([-0.5,7])
+    ax.invert_yaxis()
+    ax.set_title('Phase Profile', size=25)
+    ax.tick_params(axis='both', labelsize=25)
+    ax.tick_params(direction='in', length=6, width=2, colors='black')
+    ax.plot(phase, z, linewidth=2, color='blue', label='Temperature = '+str(round(T_surface,1))+'K')
+    plt.legend(loc="upper right", prop={'size':20})
+    fig.savefig('Output Files/Figures/phase_profile.png')
+
+
+
+"""
+# make for loop for reading in files?
+df0=pd.read_csv('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files/T1M1Rb1.txt', usecols=[0,5,6,10,11], sep=' ') 
 z0=df0["depth"]
+phase0=df0["phase"]
 T0=df0["temperature"]
+q0=df0["surface_heat_flux"]
+Q0=df0["total_internal_heat"]
+
+df1=pd.read_csv('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files/T2M1Rb1.txt', usecols=[0,5,6,10,11], sep=' ') 
+z1=df1["depth"]
+phase1=df1["phase"]
+T1=df1["temperature"]
+q1=df1["surface_heat_flux"]
+Q1=df1["total_internal_heat"]
+
+
+# plot temp profile
+fig, ax = plt.subplots(figsize=(15, 11))
+ax.set_xlabel('Depth (km)', size=30)
+ax.set_ylabel('Temperature (K)', size=30)
+ax.set_title('Temperature Profile', size=25)
+ax.tick_params(axis='both', labelsize=25)
+ax.tick_params(direction='in', length=6, width=2, colors='black')
+ax.plot(z0, T0, linewidth=2, color='blue')
+plt.show()
+
+# plot phase profile
+fig, ax = plt.subplots(figsize=(15, 11))
+ax.set_xlabel('Depth (km)', size=30)
+ax.set_ylabel('Phase', size=30)
+ax.set_title('Phase Profile', size=25)
+ax.tick_params(axis='both', labelsize=25)
+ax.tick_params(direction='in', length=6, width=2, colors='black')
+ax.plot(z0, phase0, linewidth=2, color='blue')
+plt.show()
+
+# make single values, append to array for diff temps
 #Q0 = access single cell https://stackoverflow.com/questions/16729574/how-to-get-a-value-from-a-cell-of-a-dataframe
-
-
-
-"""
-# To read in data with a for loop - this might not actually be possible because can't have for loop-dependent string within file path
-#initalize the dictionary 
-data = {}
-#for loop to get key names
-for count1 in range(res_T):
-    for count2 in range(res_MW):
-        for count3 in range(res_r):
-            #key name is what the array is called
-            key_name = "Q"+ str(count1 + 1) + str(count2 + 1) + str(count3 + 1)
-            #value is what the data actually is
-            value = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/"T"+str(count1+1)+"M"+str(count2+1)+"Rb"+str(count3+1)+".txt"',usecols=11)
-            #now that we have both we can add this to the dictionary
-            data[key_name] = value
 """
 
-
-"""
-for count1 in range(res_T):
-    for count2 in range(res_MW):
-        for count3 in range(res_r):
-            # Q arrays
-            array_name = "Q"+str(count1+1)+str(count2+1)+str(count3+1) #name arrays
-            array_name = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=11)
-            
-            # Q_surface array for all trials
-            Q_surface_value = array_name[0] # take first value from array of Q values to get Q_surface
-            Q_surface_array=np.append(Q_surface_array,Q_surface_value)
-
-            #Create temp profile arrays
-            # z arrays
-            array_name2 = "z"+str(count1+1)+str(count2+1)+str(count3+1)
-            array_name2 = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=0)
-
-            # T arrays
-            array_name3 = "T"+str(count1+1)+str(count2+1)+str(count3+1)
-            array_name3 = np.genfromtxt('/Users/karleetaylor/Dropbox/My\ Mac\ \(Karlee’s\ MacBook\ Pro\)/Documents/PythonPrograms/__FILE NAME__.txt',usecols=6)
-"""
 """
 # Plot surface flux vs surface temp
 fig, ax = plt.subplots(figsize=(15, 11))
@@ -81,6 +130,6 @@ ax.plot(surface_t_array, Q_surface_array, linewidth=2, color='blue')
 #https://pypi.org/project/celluloid/
 
 from celluloid import Camera
-
 """
+
 print('done')
