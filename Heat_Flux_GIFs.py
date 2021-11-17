@@ -34,6 +34,8 @@ print(csv_files) #empty
     #data=np.loadtxt(f,delimeter=" ", skiprows=6)
 #myFiles=glob.glob('*.txt)
 
+
+
 # loop over the list of csv files
 for f in csv_files:
     # read the csv file
@@ -74,15 +76,20 @@ for f in csv_files:
     #plt.legend(loc="upper right", prop={'size':20})
     fig.savefig('Output Files/'+os.path.basename(f)+'.png')
 
+
+
+
+
 from PIL import Image
 import glob
  
 # Create the frames
 frames = []
-imgs = glob.glob("*.png")
+imgs = glob.glob('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files/Figures/*.png')
 for i in imgs:
     new_frame = Image.open(i)
     frames.append(new_frame)
+print(frames)
  
 # Save into a GIF file that loops forever
 frames[0].save('png_to_gif.gif', format='GIF',
@@ -90,13 +97,12 @@ frames[0].save('png_to_gif.gif', format='GIF',
                save_all=True,
                duration=300, loop=0)
 
+
 """
 # to make GIF of temperature profiles:
 #https://pythonprogramming.altervista.org/png-to-gif/
 #https://stackoverflow.com/questions/753190/programmatically-generate-video-or-animated-gif-in-python
 #https://pypi.org/project/celluloid/
-
-from celluloid import Camera
 """
 
 print('done')
