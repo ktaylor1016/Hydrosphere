@@ -66,7 +66,7 @@ import glob
 # Create the frames
 frames = []
 imgs = glob.glob('/Users/karleetaylor/Dropbox/My Mac (Karlee’s MacBook Pro)/Documents/PythonPrograms/Output Files/*.png')
-imgs.sort()
+imgs.sort(reverse=True)
 for i in imgs:
     new_frame = Image.open(i)
     frames.append(new_frame)
@@ -79,3 +79,5 @@ frames[0].save('263_to_373K.gif', format='GIF',
 
 print('done')
 
+# go high to low temp
+# NEXT - add wedge plot!
